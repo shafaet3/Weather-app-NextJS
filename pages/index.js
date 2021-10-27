@@ -8,7 +8,7 @@ export default function Home() {
       </Head>
       <div className="home">
         <div className="container">
-          <SearchBox />
+          <SearchBox placeholder="Search for a city..." />
         </div>
       </div>
     </div>
