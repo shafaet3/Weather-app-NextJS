@@ -40,7 +40,7 @@ function TodaysWeather({ city, weather }) {
             />
           </div>
         </div>
-          <h3>{weather.weather[0].description}</h3>
+        <h3>{weather.weather[0].description}</h3>
       </div>
     </div>
   );
