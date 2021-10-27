@@ -3,7 +3,7 @@ import React, { isValidElement } from "react";
 import Image from "next/image";
 
 function TodaysWeather({ city, weather, timezone }) {
-  console.log(city, weather);
+  // console.log(city, weather);
   return (
     <div className="today">
       <div className="today__inner">

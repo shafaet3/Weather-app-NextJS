@@ -31,7 +31,7 @@ export async function getServerSideProps(context) {
     };
   }
 
-  console.log(data);
+  // console.log(data);
 
   const slug = context.params.city;
 
