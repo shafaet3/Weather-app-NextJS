@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import cities from "../lib/city.list.json";
 import Link from "next/link";
+import Router from "next/router";
+
 export default function SearchBox({ placeholder }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -31,6 +33,15 @@ export default function SearchBox({ placeholder }) {
       return setResults(matchingCities);
     }
   };
+
+  useEffect(() => {
+    const clearQuery = () => setQuery("");
+
+    Router.events.on("routeChangeComplete", clearQuery);
+    return () => {
+      Router.events.off("routeChangeComplete", clearQuery);
+    };
+  }, []);
   return (
     <div className="search">
       <input
