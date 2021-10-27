@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment from "moment-timezone";
 import React, { isValidElement } from "react";
 import Image from "next/image";
 
