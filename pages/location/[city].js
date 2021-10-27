@@ -5,6 +5,8 @@ import Link from "next/link";
 import TodaysWeather from "../../components/TodaysWeather";
 import SearchBox from "../../components/SearchBox";
 import moment from "moment-timezone";
+import HourlyWeather from "../../components/HourlyWeather";
+import WeeklyWeather from "../../components/WeeklyWeather";
 
 export async function getServerSideProps(context) {
   const city = getCity(context.params.city);
@@ -82,7 +84,7 @@ function City({
   weeklyWeather,
   timezone,
 }) {
-  console.log(hourlyWeather);
+  // console.log(hourlyWeather);
   return (
     <div>
       <Head>
@@ -100,8 +102,9 @@ function City({
             weather={weeklyWeather[0]}
             timezone={timezone}
           />
-          {/* <HourlyWeather hourlyWeather={hourlyWeather} timezone={timezone} />
-          <WeeklyWeather weeklyWeather={weeklyWeather} timezone={timezone} /> */}
+          <HourlyWeather hourlyWeather={hourlyWeather} timezone={timezone} />
+
+          <WeeklyWeather weeklyWeather={weeklyWeather} timezone={timezone} />
         </div>
       </div>
     </div>
