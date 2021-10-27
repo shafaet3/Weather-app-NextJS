@@ -2,7 +2,7 @@ import moment from "moment";
 import React, { isValidElement } from "react";
 import Image from "next/image";
 
-function TodaysWeather({ city, weather }) {
+function TodaysWeather({ city, weather, timezone }) {
   console.log(city, weather);
   return (
     <div className="today">
@@ -19,12 +19,16 @@ function TodaysWeather({ city, weather }) {
           <div className="today__sun-times">
             <div>
               <span>Sunrise</span>
-              <span>{moment.unix(weather.sunrise).format("LT")}</span>
+              <span>
+                {moment.unix(weather.sunrise).tz(timezone).format("LT")}
+              </span>
             </div>
 
             <div>
               <span>Sunset</span>
-              <span>{moment.unix(weather.sunset).format("LT")}</span>
+              <span>
+                {moment.unix(weather.sunset).tz(timezone).format("LT")}
+              </span>
             </div>
           </div>
         </div>
