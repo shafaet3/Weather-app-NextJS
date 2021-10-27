@@ -42,6 +42,7 @@ export default function SearchBox({ placeholder }) {
       Router.events.off("routeChangeComplete", clearQuery);
     };
   }, []);
+
   return (
     <div className="search">
       <input
