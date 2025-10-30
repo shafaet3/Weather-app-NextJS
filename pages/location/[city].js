@@ -69,13 +69,23 @@ const getCity = (params) => {
 };
 
 const getHourlyWeather = (hourlyData, timezone) => {
-  const endOfDay = moment().tz(timezone).endOf("day").valueOf();
+  // Handle missing timezone or hourlyData
+  if (!timezone || !hourlyData) {
+    console.error("Missing timezone or hourlyData:", { timezone, hourlyData });
+    return [];
+  }
+
+  // Ensure moment-timezone recognizes the timezone
+  const tzMoment = moment.tz.zone(timezone)
+    ? moment().tz(timezone)
+    : moment();
+
+  const endOfDay = tzMoment.endOf("day").valueOf();
   const endTimeStamp = Math.floor(endOfDay / 1000);
 
-  const todaysData = hourlyData.filter((data) => data.dt < endTimeStamp);
-
-  return todaysData;
+  return hourlyData.filter((data) => data.dt < endTimeStamp);
 };
+
 
 function City({
   city,
