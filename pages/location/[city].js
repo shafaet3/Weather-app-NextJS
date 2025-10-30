@@ -9,46 +9,45 @@ import HourlyWeather from "../../components/HourlyWeather";
 import WeeklyWeather from "../../components/WeeklyWeather";
 
 export async function getServerSideProps(context) {
-  const city = getCity(context.params.city);
+  try {
+    const city = getCity(context.params.city);
 
-  // console.log(city);
+    if (!city) return { notFound: true };
 
-  if (!city) {
+    const res = await fetch(
+      `https://api.openweathermap.org/data/3.0/onecall?lat=${city.coord.lat}&lon=${city.coord.lon}&appid=${process.env.API_KEY}&units=metric&exclude=minutely`
+    );
+
+    if (!res.ok) {
+      console.error("OpenWeather API error:", res.status);
+      return { notFound: true };
+    }
+
+    const data = await res.json();
+
+    if (!data || !data.hourly || !data.daily) {
+      console.error("Incomplete weather data:", data);
+      return { notFound: true };
+    }
+
+    const hourlyWeather = getHourlyWeather(data.hourly, data.timezone);
+    const weeklyWeather = data.daily;
+
     return {
-      notFound: true,
+      props: {
+        city,
+        timezone: data.timezone,
+        currentWeather: data.current,
+        hourlyWeather,
+        weeklyWeather,
+      },
     };
+  } catch (err) {
+    console.error("Server error:", err);
+    return { notFound: true };
   }
-
-  const res = await fetch(
-    `https://api.openweathermap.org/data/3.0/onecall?lat=${city.coord.lat}&lon=${city.coord.lon}&appid=${process.env.API_KEY}&units=metric&exclude=minutely`
-  );
-
-
-  const data = await res.json();
-
-  if (!data) {
-    return {
-      notFound: true,
-    };
-  }
-
-  // console.log(data);
-
-  const slug = context.params.city;
-
-  const hourlyWeather = getHourlyWeather(data.hourly, data.timezone);
-  const weeklyWeather = data.daily;
-
-  return {
-    props: {
-      city: city,
-      timezone: data.timezone,
-      currentWeather: data.current,
-      hourlyWeather: hourlyWeather,
-      weeklyWeather: weeklyWeather,
-    },
-  };
 }
+
 
 const getCity = (params) => {
   const cityParams = params.trim();
