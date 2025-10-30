@@ -1,43 +1,49 @@
+// pages/location/[city].js
 import React from "react";
 import cities from "../../lib/city.list.json";
 import Head from "next/head";
 import Link from "next/link";
 import TodaysWeather from "../../components/TodaysWeather";
 import SearchBox from "../../components/SearchBox";
-import moment from "moment-timezone";
 import HourlyWeather from "../../components/HourlyWeather";
 import WeeklyWeather from "../../components/WeeklyWeather";
+import tzlookup from "tz-lookup";
 
 export async function getServerSideProps(context) {
   try {
     const city = getCity(context.params.city);
-
     if (!city) return { notFound: true };
 
-    const res = await fetch(
-      `https://api.openweathermap.org/data/3.0/onecall?lat=${city.coord.lat}&lon=${city.coord.lon}&appid=${process.env.API_KEY}&units=metric&exclude=minutely`
-    );
+    // Dynamically get timezone from lat/lon
+    const timezone = tzlookup(city.coord.lat, city.coord.lon);
 
-    if (!res.ok) {
-      console.error("OpenWeather API error:", res.status);
+    // Fetch current and forecast data
+    const [currentRes, forecastRes] = await Promise.all([
+      fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${city.coord.lat}&lon=${city.coord.lon}&appid=${process.env.API_KEY}&units=metric`
+      ),
+      fetch(
+        `https://api.openweathermap.org/data/2.5/forecast?lat=${city.coord.lat}&lon=${city.coord.lon}&appid=${process.env.API_KEY}&units=metric`
+      ),
+    ]);
+
+    const currentData = await currentRes.json();
+    const forecastData = await forecastRes.json();
+
+    if (!currentData || !forecastData || !forecastData.list) {
+      console.error("Incomplete weather data:", { currentData, forecastData });
       return { notFound: true };
     }
 
-    const data = await res.json();
-
-    if (!data || !data.hourly || !data.daily) {
-      console.error("Incomplete weather data:", data);
-      return { notFound: true };
-    }
-
-    const hourlyWeather = getHourlyWeather(data.hourly, data.timezone);
-    const weeklyWeather = data.daily;
+    // Extract hourly (next 8 entries ~ 24 hours) and weekly (daily intervals)
+    const hourlyWeather = forecastData.list.slice(0, 8);
+    const weeklyWeather = forecastData.list.filter((_, i) => i % 8 === 0);
 
     return {
       props: {
         city,
-        timezone: data.timezone,
-        currentWeather: data.current,
+        timezone,
+        currentWeather: currentData,
         hourlyWeather,
         weeklyWeather,
       },
@@ -48,53 +54,22 @@ export async function getServerSideProps(context) {
   }
 }
 
-
+// Helper to get city object from slug
 const getCity = (params) => {
   const cityParams = params.trim();
   const splitCity = cityParams.split("-");
   const id = splitCity[splitCity.length - 1];
-
-  if (!id) {
-    return null;
-  }
-
-  const city = cities.find((city) => city.id.toString() == id);
-
-  if (city) {
-    return city;
-  } else {
-    return null;
-  }
+  if (!id) return null;
+  return cities.find((c) => c.id.toString() === id) || null;
 };
-
-const getHourlyWeather = (hourlyData, timezone) => {
-  // Handle missing timezone or hourlyData
-  if (!timezone || !hourlyData) {
-    console.error("Missing timezone or hourlyData:", { timezone, hourlyData });
-    return [];
-  }
-
-  // Ensure moment-timezone recognizes the timezone
-  const tzMoment = moment.tz.zone(timezone)
-    ? moment().tz(timezone)
-    : moment();
-
-  const endOfDay = tzMoment.endOf("day").valueOf();
-  const endTimeStamp = Math.floor(endOfDay / 1000);
-
-  return hourlyData.filter((data) => data.dt < endTimeStamp);
-};
-
 
 function City({
   city,
-  weather,
   currentWeather,
   hourlyWeather,
   weeklyWeather,
   timezone,
 }) {
-  // console.log(hourlyWeather);
   return (
     <div>
       <Head>
@@ -103,18 +78,32 @@ function City({
 
       <div className="page-wrapper">
         <div className="container">
-          <Link href="/">
-            <a className="back-link">&larr; Home</a>
+          <Link href="/" className="back-link">
+            &larr; Home
           </Link>
+
           <SearchBox placeholder="Search for another location..." />
+
           <TodaysWeather
             city={city}
-            weather={weeklyWeather[0]}
+            weather={{
+              temp: {
+                max: currentWeather.main.temp_max,
+                min: currentWeather.main.temp_min,
+              },
+              weather: currentWeather.weather,
+              sunrise: currentWeather.sys.sunrise,
+              sunset: currentWeather.sys.sunset,
+            }}
             timezone={timezone}
           />
+
           <HourlyWeather hourlyWeather={hourlyWeather} timezone={timezone} />
 
-          <WeeklyWeather weeklyWeather={weeklyWeather} timezone={timezone} />
+          <WeeklyWeather weeklyWeather={weeklyWeather}
+            timezone={timezone}
+            sunrise={currentWeather.sys.sunrise}
+            sunset={currentWeather.sys.sunset} />
         </div>
       </div>
     </div>

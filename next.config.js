@@ -1,7 +1,19 @@
 require("dotenv").config();
-module.exports = {
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["openweathermap.org"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "openweathermap.org",
+      },
+    ],
+  },
+  env: {
+    API_KEY: process.env.API_KEY,
   },
 };
+
+module.exports = nextConfig;

@@ -59,11 +59,11 @@ export default function SearchBox({ placeholder }) {
               return (
                 <li key={city.slug}>
                   <Link href={`/location/${city.slug}`}>
-                    <a>
+         
                       {city.name}
                       {city.state ? `, ${city.state}` : ""}{" "}
                       <span>({city.country})</span>
-                    </a>
+                  
                   </Link>
                 </li>
               );

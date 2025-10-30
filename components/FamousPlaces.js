@@ -15,7 +15,7 @@ const places = [
   {
     name: "Paris",
     image: ParisImage,
-    url: "location/paris-2968815",
+    url: "/location/paris-2968815",
   },
   {
     name: "Tokyo",
@@ -37,17 +37,17 @@ function FamousPlaces() {
             return (
               <div className="places__box" key={index}>
                 <Link href={place.url}>
-                  <a>
+             
                     <div className="places__image-wrapper">
                       <Image
                         src={place.image}
                         alt={`${place.name} Image`}
-                        layout="fill"
-                        objectFit="cover"
+                        fill
+                        style={{ objectFit: "cover" }}
                       />
                     </div>
                     <span>{place.name}</span>
-                  </a>
+                
                 </Link>
               </div>
             );

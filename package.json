@@ -16,7 +16,8 @@
     "nprogress": "^0.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "sass": "^1.43.3"
+    "sass": "^1.43.3",
+    "tz-lookup": "^6.1.25"
   },
   "devDependencies": {
     "eslint": "7.32.0",
